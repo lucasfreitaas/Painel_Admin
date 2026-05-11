@@ -13,12 +13,13 @@ export default function NewCompetitionModal({ onClose, onCreated }) {
   const [comp2, setComp2] = useState('')
   const [modalidade, setModalidade] = useState('')
   const [dataHora, setDataHora] = useState('')
+  const [valorApostaCompetidores, setValorApostaCompetidores] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!comp1.trim() || !comp2.trim() || !dataHora || !modalidade.trim()) {
-      toast.error('Preencha todos os campos.')
+    if (!comp1.trim() || !comp2.trim() || !dataHora || !modalidade.trim() || !valorApostaCompetidores) {
+      toast.error('Preencha todos os campos, incluindo o valor da aposta.')
       return
     }
     if (comp1.trim().toLowerCase() === comp2.trim().toLowerCase()) {
@@ -33,7 +34,8 @@ export default function NewCompetitionModal({ onClose, onCreated }) {
         competidor2: comp2.trim(),
         modalidade:  modalidade.trim(),
         dataHora:    dataHora, // Salva como YYYY-MM-DD
-        status:      'aberto',
+        valorApostaCompetidores: Number(valorApostaCompetidores),
+        status:      'pendente',
         criadoEm:    serverTimestamp(),
       })
       toast.success('Competição criada com sucesso! 🎱')
@@ -148,11 +150,33 @@ export default function NewCompetitionModal({ onClose, onCreated }) {
             />
           </div>
 
+          {/* Valor Aposta Competidores */}
+          <div>
+            <label htmlFor="comp-valor" className="label">Valor da Aposta entre Competidores (R$)</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm select-none">
+                R$
+              </span>
+              <input
+                id="comp-valor"
+                type="number"
+                min="0"
+                step="0.01"
+                className="input-field pl-10"
+                placeholder="Ex: 100,00"
+                value={valorApostaCompetidores}
+                onChange={e => setValorApostaCompetidores(e.target.value)}
+                required
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1">A banca ficará <strong>pendente</strong> até este valor ser pago e confirmado.</p>
+          </div>
+
           {/* Info */}
-          <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3">
-            <p className="text-xs text-gray-500 leading-relaxed">
-              A competição ficará visível com status <strong>Aberto</strong>. 
-              Você pode encerrá-la manualmente depois pelo painel admin.
+          <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3">
+            <p className="text-xs text-amber-700 leading-relaxed">
+              A competição será criada com status <strong>Pendente</strong>. 
+              A banca só abre para apostas após você confirmar o pagamento no card da competição.
             </p>
           </div>
 

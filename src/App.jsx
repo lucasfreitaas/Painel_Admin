@@ -14,7 +14,7 @@ export default function App() {
   const [competicoes, setCompeticoes] = useState([])
   const [loading, setLoading] = useState(true)
   const [showNewModal, setShowNewModal] = useState(false)
-  const [filtro, setFiltro] = useState('aberto') // 'aberto' | 'encerrado' | 'todos'
+  const [filtro, setFiltro] = useState('aberto') // 'pendente' | 'aberto' | 'encerrado' | 'todos'
 
 
   // Busca em tempo real as competições no Firestore
@@ -49,6 +49,7 @@ export default function App() {
 
 
   const FILTROS = [
+    { key: 'pendente',   label: 'Pendentes'   },
     { key: 'aberto',     label: 'Abertos'     },
     { key: 'encerrado',  label: 'Encerrados'  },
     { key: 'cancelado',  label: 'Cancelados'  },

@@ -52,7 +52,26 @@ export default function GameCard({ competicao }) {
   }
 
   const isAberto = status === 'aberto'
+  const isPendente = status === 'pendente'
   const isCancelado = status === 'cancelado'
+
+  function triggerConfirmPayment() {
+    setConfirmConfig({
+      title: 'Confirmar Pagamento',
+      message: `Confirma o recebimento de ${competicao.valorApostaCompetidores?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) || 'R$ 0,00'} dos competidores? A banca ficará ABERTA para apostas.`,
+      confirmText: 'Sim, Abrir Banca',
+      isDestructive: false,
+      onConfirm: async () => {
+        try {
+          await updateDoc(doc(db, 'competicoes', id), { status: 'aberto' })
+          toast.success('Banca aberta para apostas!')
+        } catch (err) {
+          console.error(err)
+          toast.error('Erro ao abrir banca.')
+        }
+      }
+    })
+  }
 
   function triggerCancelGame() {
     setConfirmConfig({
@@ -149,15 +168,17 @@ export default function GameCard({ competicao }) {
             <div className="flex gap-2">
               <span className={
                 isAberto ? 'badge-open flex-shrink-0' :
+                isPendente ? 'badge-closed bg-amber-50 text-amber-700 border-amber-200 flex-shrink-0' :
                 isCancelado ? 'badge-closed bg-red-50 text-red-600 border-red-200 flex-shrink-0' :
                 'badge-closed flex-shrink-0'
               }>
                 <span className={`w-1.5 h-1.5 rounded-full ${
                   isAberto ? 'bg-emerald-500' :
+                  isPendente ? 'bg-amber-500' :
                   isCancelado ? 'bg-red-500' :
                   'bg-gray-400'
                 }`} />
-                {isAberto ? 'Aberto' : isCancelado ? 'Cancelado' : 'Encerrado'}
+                {isAberto ? 'Aberto' : isPendente ? 'Pendente' : isCancelado ? 'Cancelado' : 'Encerrado'}
               </span>
               
               {isAberto && apostasFechadas && (
@@ -248,6 +269,33 @@ export default function GameCard({ competicao }) {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isPendente && (
+          <div className="px-5 pb-5">
+            <div className="rounded-xl bg-amber-50 border border-amber-100 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-bold text-amber-800">Aguardando Pagamento dos Competidores</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Valor da aposta: {competicao.valorApostaCompetidores?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) || 'R$ 0,00'}
+                </p>
+              </div>
+              <button
+                onClick={triggerConfirmPayment}
+                className="btn-primary bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0"
+              >
+                Confirmar Pagamento e Abrir Banca
+              </button>
+            </div>
+            <div className="mt-3 text-right">
+              <button
+                onClick={triggerCancelGame}
+                className="text-xs text-red-500 hover:text-red-700 underline"
+              >
+                Cancelar Evento
               </button>
             </div>
           </div>
